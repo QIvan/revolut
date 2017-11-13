@@ -1,0 +1,53 @@
+plugins{
+    id 'java'
+    id 'idea'
+    id 'eclipse'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '1.2.2'
+}
+
+group = 'com.revolut.interview'
+version = '1.0.0-SNAPSHOT'
+
+description = """
+Interview task for the company Revolut.com
+"""
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+mainClassName = "com.revolut.interview.Starter"
+applicationDefaultJvmArgs = ["-Xms$HZ_MIN_HEAP_SIZE", "-Xmx$HZ_MAX_HEAP_SIZE"]
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+
+    compile "com.hazelcast:hazelcast:$HZ_VERSION"
+    compile "com.hazelcast:hazelcast-client:$HZ_VERSION"
+
+    // Hazelcast Test Support
+    testCompile "com.hazelcast:hazelcast:$HZ_VERSION:tests"
+}
+
+task collectJars(type: Copy) {
+    into "$buildDir/dependencies"
+    from configurations.testRuntime
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+task(execute, dependsOn: 'processResources') << {
+    javaexec() {
+        main = mainClass
+        classpath = sourceSets.main.runtimeClasspath
+        jvmArgs = applicationDefaultJvmArgs
+    }
+}
