@@ -22,20 +22,22 @@ public class BankTest {
         long acceptorId = bank.createAccount("Acceptor");
 
         assertNotEquals(donorId, acceptorId);
-        assertEquals(BigDecimal.ZERO, bank.findAccount(donorId).getMoney());
-        assertEquals(BigDecimal.ZERO, bank.findAccount(acceptorId).getMoney());
+        assertEquals(BigDecimal.ZERO, bank.findAccount(donorId).get().getMoney());
+        assertEquals(BigDecimal.ZERO, bank.findAccount(acceptorId).get().getMoney());
 
 
         assertFalse(bank.transfer(donorId, acceptorId, BigDecimal.valueOf(10)));
+        assertFalse(bank.transfer(donorId, donorId + acceptorId + 1, BigDecimal.valueOf(10)));
+        assertFalse(bank.transfer(donorId + acceptorId + 1, acceptorId, BigDecimal.valueOf(10)));
 
         BigDecimal refillAmount = BigDecimal.valueOf(20);
         bank.refill(donorId, refillAmount);
-        assertEquals(refillAmount, bank.findAccount(donorId).getMoney());
+        assertEquals(refillAmount, bank.findAccount(donorId).get().getMoney());
 
 
         assertTrue(bank.transfer(donorId, acceptorId, BigDecimal.valueOf(5)));
-        assertEquals(BigDecimal.valueOf(5), bank.findAccount(acceptorId).getMoney());
-        assertEquals(BigDecimal.valueOf(15), bank.findAccount(donorId).getMoney());
+        assertEquals(BigDecimal.valueOf(5), bank.findAccount(acceptorId).get().getMoney());
+        assertEquals(BigDecimal.valueOf(15), bank.findAccount(donorId).get().getMoney());
 
     }
 

@@ -2,13 +2,13 @@ package com.revolut.interview;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IAtomicLong;
-import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IMap;
 import com.hazelcast.map.AbstractEntryProcessor;
 import com.revolut.interview.model.Account;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Ivan Zemlyanskiy
@@ -34,6 +34,10 @@ public class Bank {
     }
 
     public boolean transfer(long donorId, long acceptorId, BigDecimal amount) {
+        if (!accounts.containsKey(donorId) || !accounts.containsKey(acceptorId)) {
+            return false;
+        }
+
         long firstLock = Math.min(donorId, acceptorId);
         long secondLock = Math.max(donorId, acceptorId);
 
@@ -81,20 +85,20 @@ public class Bank {
     }
 
 
-    public void refill(long id, BigDecimal amount) {
-        accounts.executeOnKey(id, new AbstractEntryProcessor<Long, Account>() {
+    public BigDecimal refill(long id, BigDecimal amount) {
+        return (BigDecimal) accounts.executeOnKey(id, new AbstractEntryProcessor<Long, Account>() {
             @Override
-            public Object process(Map.Entry<Long, Account> entry) {
+            public BigDecimal process(Map.Entry<Long, Account> entry) {
                 Account account = entry.getValue();
                 account.setMoney(account.getMoney().add(amount));
                 // if there is no this line account remains unchanged
                 entry.setValue(account);
-                return entry;
+                return account.getMoney();
             }
         });
     }
 
-    public Account findAccount(long id) {
-        return accounts.get(id);
+    public Optional<Account> findAccount(long id) {
+        return Optional.ofNullable(accounts.get(id));
     }
 }

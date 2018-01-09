@@ -25,22 +25,31 @@ repositories {
 
 dependencies {
 
-    // https://mvnrepository.com/artifact/io.projectreactor.ipc/reactor-netty
+//    http
     compile group: 'io.undertow', name: 'undertow-core', version: '1.4.21.Final'
     compile group: 'io.undertow', name: 'undertow-servlet', version: '1.4.21.Final'
 
+//    json mapper
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.2'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.2'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.2'
 
+//    data grid
     compile "com.hazelcast:hazelcast:$HZ_VERSION"
     compile "com.hazelcast:hazelcast-client:$HZ_VERSION"
 
+//    properties
+    compile "org.aeonbits.owner:owner-java8:1.0.6"
 
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+
+//    lombok
     apt "org.projectlombok:lombok:1.16.18"
     compileOnly 'org.projectlombok:lombok:1.16.18'
 
+//    tests
     testCompile "junit:junit:4.12"
-    // Hazelcast Test Support
     testCompile "com.hazelcast:hazelcast:$HZ_VERSION:tests"
-
 
 }
 
