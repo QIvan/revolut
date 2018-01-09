@@ -21,4 +21,11 @@ Implicit requirements:
 1. the code produced by you is expected to be of high quality.
 2. there are no detailed requirements, use common sense.
 
-**Please​ ​put​ ​your​ ​work​ ​on​ ​github​ ​or​ ​bitbucket.**
+**Please put your work on github or bitbucket.**
+
+## How to run
+
+```bash
+./gradlew clean test runShadow
+```
+
