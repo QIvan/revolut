@@ -11,20 +11,24 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
+ * The main logic for actions with accounts.
+ *
+ * The Hazelcast has terrible API!
+ * Every method returns {@link Object} and you should cast result value. =(
+ * The Hazelcast has target java version 1.6 and in that reason reason there is no support lambda functions at all. =(
+ *
  * @author Ivan Zemlyanskiy
  */
 public class Bank {
     public static final String ACCOUNTS = "ACCOUNTS";
     public static final String ACCOUNT_ID = "ACCOUNT_ID";
 
-    private final HazelcastInstance hazelcast;
     private final IMap<Long, Account> accounts;
     private final IAtomicLong nextId;
 
     public Bank(HazelcastInstance hazelcastInstance) {
-        hazelcast = hazelcastInstance;
-        accounts = hazelcast.getMap(ACCOUNTS);
-        nextId = hazelcast.getAtomicLong(ACCOUNT_ID);
+        accounts = hazelcastInstance.getMap(ACCOUNTS);
+        nextId = hazelcastInstance.getAtomicLong(ACCOUNT_ID);
     }
 
     public long createAccount(String name) {
