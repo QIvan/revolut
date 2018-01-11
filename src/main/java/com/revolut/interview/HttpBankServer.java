@@ -1,6 +1,5 @@
 package com.revolut.interview;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revolut.interview.config.HttpConfig;
 import com.revolut.interview.model.Account;
@@ -11,7 +10,6 @@ import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.ExceptionHandler;
-import io.undertow.server.handlers.RequestDumpingHandler;
 import io.undertow.util.Headers;
 import io.undertow.util.StatusCodes;
 import lombok.extern.slf4j.Slf4j;
@@ -49,9 +47,7 @@ public class HttpBankServer {
                         Handlers.path()
                                 .addPrefixPath("/account", Handlers.routing()
                                         .get("/info/{id}", exchange -> exchange.dispatch(this::info))
-                                        // convenient method for tests and etc
-                                        .get("/info/{id}/money", exchange -> exchange.dispatch(this::infoMoney))
-                                        .put("/create", exchange -> exchange.dispatch(this::create))
+                                        .post("/create", exchange -> exchange.dispatch(this::create))
                                         .post("/refill", exchange -> exchange.dispatch(this::refill))
                                         .post("/transfer", exchange -> exchange.dispatch(this::transfer))
                                         .setFallbackHandler(this::notFoundHandler)
@@ -90,14 +86,6 @@ public class HttpBankServer {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        });
-    }
-
-    private void infoMoney(HttpServerExchange exchange) {
-        long id = extractId(exchange);
-
-        findAccount(exchange, id).ifPresent(account -> {
-            exchange.getResponseSender().send(account.getMoney().toString());
         });
     }
 
