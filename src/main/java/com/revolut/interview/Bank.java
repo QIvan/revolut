@@ -86,16 +86,24 @@ public class Bank {
 
 
     public BigDecimal refill(long id, BigDecimal amount) {
-        return (BigDecimal) accounts.executeOnKey(id, new AbstractEntryProcessor<Long, Account>() {
-            @Override
-            public BigDecimal process(Map.Entry<Long, Account> entry) {
-                Account account = entry.getValue();
-                account.setMoney(account.getMoney().add(amount));
-                // if there is no this line account remains unchanged
-                entry.setValue(account);
-                return account.getMoney();
-            }
-        });
+        try {
+            accounts.lock(id);
+            return (BigDecimal) accounts.executeOnKey(id, new AbstractEntryProcessor<Long, Account>() {
+                @Override
+                public BigDecimal process(Map.Entry<Long, Account> entry) {
+                    Account account = entry.getValue();
+                    if (amount.signum() < 0) {
+                        return account.getMoney();
+                    }
+                    account.setMoney(account.getMoney().add(amount));
+                    // if there is no this line account remains unchanged
+                    entry.setValue(account);
+                    return account.getMoney();
+                }
+            });
+        } finally {
+            accounts.unlock(id);
+        }
     }
 
     public Optional<Account> findAccount(long id) {

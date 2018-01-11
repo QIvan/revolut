@@ -2,6 +2,7 @@ package com.revolut.interview;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.test.TestHazelcastInstanceFactory;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -13,10 +14,15 @@ import static org.junit.Assert.*;
  */
 public class BankTest {
 
+    private HazelcastInstance hazelcastInstance;
+
+    @Before
+    public void setUp() throws Exception {
+        hazelcastInstance = new TestHazelcastInstanceFactory().newHazelcastInstance();
+    }
+
     @Test
     public void accountCreateRefillAndTransfer() {
-        HazelcastInstance hazelcastInstance = new TestHazelcastInstanceFactory().newHazelcastInstance();
-
         Bank bank = new Bank(hazelcastInstance);
         long donorId = bank.createAccount("Donor");
         long acceptorId = bank.createAccount("Acceptor");
@@ -41,4 +47,28 @@ public class BankTest {
 
     }
 
+    @Test
+    public void refillOnNegativeAmountShouldNotChangeAccount() throws Exception {
+
+        Bank bank = new Bank(hazelcastInstance);
+        long id = bank.createAccount("Account");
+
+        bank.refill(id, new BigDecimal(-10));
+
+        assertEquals(BigDecimal.ZERO, bank.findAccount(id).get().getMoney());
+    }
+
+    @Test
+    public void transferTheSameAccount() {
+
+        Bank bank = new Bank(hazelcastInstance);
+        long id = bank.createAccount("The same");
+
+        BigDecimal amount = new BigDecimal(42);
+        bank.refill(id, amount);
+
+        assertTrue(bank.transfer(id, id, amount));
+
+        assertEquals(amount, bank.findAccount(id).get().getMoney());
+    }
 }
