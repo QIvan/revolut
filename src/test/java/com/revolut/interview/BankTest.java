@@ -22,7 +22,7 @@ public class BankTest {
     }
 
     @Test
-    public void accountCreateRefillAndTransfer() {
+    public void testAccountCreateRefillAndTransfer() {
         Bank bank = new Bank(hazelcastInstance);
         long donorId = bank.createAccount("Donor");
         long acceptorId = bank.createAccount("Acceptor");
@@ -56,6 +56,22 @@ public class BankTest {
         bank.refill(id, new BigDecimal(-10));
 
         assertEquals(BigDecimal.ZERO, bank.findAccount(id).get().getMoney());
+    }
+
+    @Test
+    public void transferOnNegativeAmountShouldFailAndDoNothing() throws Exception {
+
+        Bank bank = new Bank(hazelcastInstance);
+        long donorId = bank.createAccount("Donor");
+        long acceptorId = bank.createAccount("Acceptor");
+
+        BigDecimal amount = BigDecimal.valueOf(20);
+        bank.refill(donorId, amount);
+
+        assertFalse(bank.transfer(donorId, acceptorId, BigDecimal.valueOf(-10)));
+
+        assertEquals(amount, bank.findAccount(donorId).get().getMoney());
+        assertEquals(BigDecimal.ZERO, bank.findAccount(acceptorId).get().getMoney());
     }
 
     @Test

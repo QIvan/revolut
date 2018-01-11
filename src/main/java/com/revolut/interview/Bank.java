@@ -38,6 +38,9 @@ public class Bank {
     }
 
     public boolean transfer(long donorId, long acceptorId, BigDecimal amount) {
+        if (amount.signum() < 0) {
+            return false;
+        }
         if (!accounts.containsKey(donorId) || !accounts.containsKey(acceptorId)) {
             return false;
         }
