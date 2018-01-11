@@ -114,6 +114,11 @@ public class Bank {
     }
 
     public Optional<Account> findAccount(long id) {
-        return Optional.ofNullable(accounts.get(id));
+        try {
+            accounts.lock(id);
+            return Optional.ofNullable(accounts.get(id));
+        } finally {
+            accounts.unlock(id);
+        }
     }
 }

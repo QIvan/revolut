@@ -65,12 +65,11 @@ public class BankTest {
         long donorId = bank.createAccount("Donor");
         long acceptorId = bank.createAccount("Acceptor");
 
-        BigDecimal amount = BigDecimal.valueOf(20);
-        bank.refill(donorId, amount);
+        BigDecimal donorAmount = bank.refill(donorId, BigDecimal.TEN);
 
         assertFalse(bank.transfer(donorId, acceptorId, BigDecimal.valueOf(-10)));
 
-        assertEquals(amount, bank.findAccount(donorId).get().getMoney());
+        assertEquals(donorAmount, bank.findAccount(donorId).get().getMoney());
         assertEquals(BigDecimal.ZERO, bank.findAccount(acceptorId).get().getMoney());
     }
 
@@ -80,8 +79,7 @@ public class BankTest {
         Bank bank = new Bank(hazelcastInstance);
         long id = bank.createAccount("The same");
 
-        BigDecimal amount = new BigDecimal(42);
-        bank.refill(id, amount);
+        BigDecimal amount = bank.refill(id, BigDecimal.TEN);
 
         assertTrue(bank.transfer(id, id, amount));
 
