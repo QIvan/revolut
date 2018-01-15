@@ -42,6 +42,7 @@ dependencies {
     compile "org.aeonbits.owner:owner-java8:1.0.6"
 
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
 
 //    lombok
     apt "org.projectlombok:lombok:1.16.18"
@@ -50,6 +51,8 @@ dependencies {
 //    tests
     testCompile "junit:junit:4.12"
     testCompile "com.hazelcast:hazelcast:$HZ_VERSION:tests"
+    testCompile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
+
 
 }
 

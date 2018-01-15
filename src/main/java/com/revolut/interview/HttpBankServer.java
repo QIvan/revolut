@@ -28,6 +28,12 @@ import java.util.Optional;
 @Slf4j
 public class HttpBankServer {
 
+    public static final String ACCOUNT = "/account";
+    public static final String INFO = "/info";
+    public static final String CREATE = "/create";
+    public static final String REFILL = "/refill";
+    public static final String TRANSFER = "/transfer";
+
     private final Undertow httpServer;
     private final Bank bank;
     private final ObjectMapper jsonMapper = new ObjectMapper();
@@ -45,11 +51,11 @@ public class HttpBankServer {
                 .addHttpListener(httpPort, httpConfig.host())
                 .setHandler(Handlers.exceptionHandler(
                         Handlers.path()
-                                .addPrefixPath("/account", Handlers.routing()
-                                        .get("/info/{id}", exchange -> exchange.dispatch(this::info))
-                                        .post("/create", exchange -> exchange.dispatch(this::create))
-                                        .post("/refill", exchange -> exchange.dispatch(this::refill))
-                                        .post("/transfer", exchange -> exchange.dispatch(this::transfer))
+                                .addPrefixPath(ACCOUNT, Handlers.routing()
+                                        .get(INFO + "/{id}", exchange -> exchange.dispatch(this::info))
+                                        .post(CREATE, exchange -> exchange.dispatch(this::create))
+                                        .post(REFILL, exchange -> exchange.dispatch(this::refill))
+                                        .post(TRANSFER, exchange -> exchange.dispatch(this::transfer))
                                         .setFallbackHandler(this::notFoundHandler)
                                 )
                         ).addExceptionHandler(Throwable.class, exchange -> {

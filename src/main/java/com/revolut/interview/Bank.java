@@ -5,6 +5,7 @@ import com.hazelcast.core.IAtomicLong;
 import com.hazelcast.core.IMap;
 import com.hazelcast.map.AbstractEntryProcessor;
 import com.revolut.interview.model.Account;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -19,6 +20,7 @@ import java.util.Optional;
  *
  * @author Ivan Zemlyanskiy
  */
+@Slf4j
 public class Bank {
     public static final String ACCOUNTS = "ACCOUNTS";
     public static final String ACCOUNT_ID = "ACCOUNT_ID";
@@ -39,11 +41,18 @@ public class Bank {
 
     public boolean transfer(long donorId, long acceptorId, BigDecimal amount) {
         if (amount.signum() < 0) {
+            log.debug("Transfer amount is negative");
             return false;
         }
-        if (!accounts.containsKey(donorId) || !accounts.containsKey(acceptorId)) {
+        if (!accounts.containsKey(donorId)) {
+            log.debug("Wrong donorId {}", donorId);
             return false;
         }
+        if (!accounts.containsKey(acceptorId)) {
+            log.debug("Wrong acceptorId {}", acceptorId);
+            return false;
+        }
+
 
         long firstLock = Math.min(donorId, acceptorId);
         long secondLock = Math.max(donorId, acceptorId);
@@ -57,6 +66,7 @@ public class Bank {
                 public Boolean process(Map.Entry<Long, Account> entry) {
                     Account donor = entry.getValue();
                     if (donor.getMoney().compareTo(amount) < 0) {
+                        log.debug("Insufficient funds");
                         return false;
                     } else {
                         donor.setMoney(donor.getMoney().subtract(amount));
