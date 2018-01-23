@@ -1,10 +1,26 @@
-plugins{
-    id 'net.ltgt.apt' version '0.10'
-    id 'java'
-    id 'idea'
-    id 'application'
-    id 'com.github.johnrengelman.shadow' version '1.2.2'
+buildscript {
+    ext.apt_plugin_version = '0.13'
+    ext.shadow_plugin_version = '2.0.2'
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "net.ltgt.gradle:gradle-apt-plugin:$apt_plugin_version"
+        classpath "com.github.jengelman.gradle.plugins:shadow:$shadow_plugin_version"
+    }
 }
+
+apply plugin: 'java'
+apply plugin: 'net.ltgt.apt'
+apply plugin: 'application'
+apply plugin: 'idea'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+
 
 group = 'com.revolut.interview'
 version = '1.0.0-SNAPSHOT'
@@ -16,8 +32,9 @@ Interview task for the company Revolut.com
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-mainClassName = "com.revolut.interview.Starter"
 applicationDefaultJvmArgs = ["-Xmx$HZ_MAX_HEAP_SIZE"]
+
+mainClassName = "com.revolut.interview.Starter"
 
 repositories {
     jcenter()
@@ -56,22 +73,10 @@ dependencies {
 
 }
 
-task collectJars(type: Copy) {
-    into "$buildDir/dependencies"
-    from configurations.testRuntime
-}
 
 idea {
     module {
         downloadJavadoc = true
         downloadSources = true
-    }
-}
-
-task(execute, dependsOn: 'processResources') << {
-    javaexec() {
-        main = mainClass
-        classpath = sourceSets.main.runtimeClasspath
-        jvmArgs = applicationDefaultJvmArgs
     }
 }
