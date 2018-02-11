@@ -14,22 +14,20 @@ import static org.junit.Assert.*;
  */
 public class BankTest {
 
-    private HazelcastInstance hazelcastInstance;
 
     @Before
     public void setUp() throws Exception {
-        hazelcastInstance = new TestHazelcastInstanceFactory().newHazelcastInstance();
     }
 
     @Test
     public void testAccountCreateRefillAndTransfer() {
-        Bank bank = new Bank(hazelcastInstance);
+        Bank bank = new Bank();
         long donorId = bank.createAccount("Donor");
         long acceptorId = bank.createAccount("Acceptor");
 
         assertNotEquals(donorId, acceptorId);
-        assertEquals(BigDecimal.ZERO, bank.findAccount(donorId).get().getMoney());
-        assertEquals(BigDecimal.ZERO, bank.findAccount(acceptorId).get().getMoney());
+        assertEquals(BigDecimal.ZERO, bank.findAccount(donorId).getMoney());
+        assertEquals(BigDecimal.ZERO, bank.findAccount(acceptorId).getMoney());
 
 
         assertFalse(bank.transfer(donorId, acceptorId, BigDecimal.valueOf(10)));
@@ -38,30 +36,30 @@ public class BankTest {
 
         BigDecimal refillAmount = BigDecimal.valueOf(20);
         bank.refill(donorId, refillAmount);
-        assertEquals(refillAmount, bank.findAccount(donorId).get().getMoney());
+        assertEquals(refillAmount, bank.findAccount(donorId).getMoney());
 
 
         assertTrue(bank.transfer(donorId, acceptorId, BigDecimal.valueOf(5)));
-        assertEquals(BigDecimal.valueOf(5), bank.findAccount(acceptorId).get().getMoney());
-        assertEquals(BigDecimal.valueOf(15), bank.findAccount(donorId).get().getMoney());
+        assertEquals(BigDecimal.valueOf(5), bank.findAccount(acceptorId).getMoney());
+        assertEquals(BigDecimal.valueOf(15), bank.findAccount(donorId).getMoney());
 
     }
 
     @Test
     public void refillOnNegativeAmountShouldNotChangeAccount() throws Exception {
 
-        Bank bank = new Bank(hazelcastInstance);
+        Bank bank = new Bank();
         long id = bank.createAccount("Account");
 
         bank.refill(id, new BigDecimal(-10));
 
-        assertEquals(BigDecimal.ZERO, bank.findAccount(id).get().getMoney());
+        assertEquals(BigDecimal.ZERO, bank.findAccount(id).getMoney());
     }
 
     @Test
     public void transferOnNegativeAmountShouldFailAndDoNothing() throws Exception {
 
-        Bank bank = new Bank(hazelcastInstance);
+        Bank bank = new Bank();
         long donorId = bank.createAccount("Donor");
         long acceptorId = bank.createAccount("Acceptor");
 
@@ -69,20 +67,20 @@ public class BankTest {
 
         assertFalse(bank.transfer(donorId, acceptorId, BigDecimal.valueOf(-10)));
 
-        assertEquals(donorAmount, bank.findAccount(donorId).get().getMoney());
-        assertEquals(BigDecimal.ZERO, bank.findAccount(acceptorId).get().getMoney());
+        assertEquals(donorAmount, bank.findAccount(donorId).getMoney());
+        assertEquals(BigDecimal.ZERO, bank.findAccount(acceptorId).getMoney());
     }
 
     @Test
     public void transferTheSameAccount() {
 
-        Bank bank = new Bank(hazelcastInstance);
+        Bank bank = new Bank();
         long id = bank.createAccount("The same");
 
         BigDecimal amount = bank.refill(id, BigDecimal.TEN);
 
         assertTrue(bank.transfer(id, id, amount));
 
-        assertEquals(amount, bank.findAccount(id).get().getMoney());
+        assertEquals(amount, bank.findAccount(id).getMoney());
     }
 }
