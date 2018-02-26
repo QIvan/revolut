@@ -12,13 +12,6 @@ import io.ktor.server.netty.*
  * @author Ivan Zemlyanskiy
  */
 fun main(args: Array<String>) {
-    val server = embeddedServer(Netty, 8080) {
-        install(DefaultHeaders)
-        routing {
-            get("/") {
-                call.respondText("Hello, world!", ContentType.Text.Html)
-            }
-        }
-    }
-    server.start(wait = true)
+    val server = HttpBankServer(Bank(), 9000)
+    server.start()
 }

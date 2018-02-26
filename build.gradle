@@ -1,9 +1,8 @@
 buildscript {
     ext.kotlin_version = '1.2.21'
-    ext.apt_plugin_version = '0.13'
     ext.shadow_plugin_version = '2.0.2'
 
-    ext.ktor_version = '0.9.0'
+    ext.ktor_version = '0.9.1'
 
     repositories {
         jcenter()
@@ -14,14 +13,12 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "net.ltgt.gradle:gradle-apt-plugin:$apt_plugin_version"
         classpath "com.github.jengelman.gradle.plugins:shadow:$shadow_plugin_version"
     }
 }
 
 apply plugin: 'kotlin'
 apply plugin: 'java'
-apply plugin: 'net.ltgt.apt'
 apply plugin: 'application'
 apply plugin: 'idea'
 // uncomment if you need fat jar
@@ -46,7 +43,7 @@ mainClassName = "com.revolut.interview.BankApplicationKt"
 repositories {
     jcenter()
     mavenCentral()
-    maven { url  "http://dl.bintray.com/kotlin/ktor" }
+    maven { url "http://dl.bintray.com/kotlin/ktor" }
     maven { url "https://dl.bintray.com/kotlin/kotlinx" }
 }
 
@@ -57,26 +54,21 @@ shadowJar {
 dependencies {
 
 //    kotlin stuff
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 
     compile "io.ktor:ktor-server-core:$ktor_version"
     compile "io.ktor:ktor-server-netty:$ktor_version"
 
-//    http
-    compile group: 'io.undertow', name: 'undertow-core', version: '1.4.21.Final'
-    compile group: 'io.undertow', name: 'undertow-servlet', version: '1.4.21.Final'
+    compile "io.ktor:ktor-locations:$ktor_version"
+    compile "io.ktor:ktor-jackson:$ktor_version"
+    compile "io.ktor:ktor-html-builder:$ktor_version"
+
 
 //    json mapper
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.2'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.2'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.2'
-
-//    data grid
-    compile "com.hazelcast:hazelcast:$HZ_VERSION"
-    compile "com.hazelcast:hazelcast-client:$HZ_VERSION"
+//    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.2'
+//    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.2'
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.2'
+    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.9.2'
 
 //    properties
     compile "org.aeonbits.owner:owner-java8:1.0.6"
@@ -84,15 +76,10 @@ dependencies {
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
 
-//    lombok
-    apt "org.projectlombok:lombok:1.16.18"
-    compileOnly 'org.projectlombok:lombok:1.16.18'
-
 //    tests
     testCompile "junit:junit:4.12"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
-    testCompile "com.hazelcast:hazelcast:$HZ_VERSION:tests"
     testCompile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
 }
 

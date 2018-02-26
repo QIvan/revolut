@@ -5,7 +5,7 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.revolut.interview.model.Account;
-import io.undertow.util.StatusCodes;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -52,7 +52,7 @@ public class HttpBankServerTest {
     @Test
     public void concurrentTransferShouldBeSequentiallyConsistent() throws Exception {
 
-        assertEquals(StatusCodes.NO_CONTENT, Unirest.get(testAddress(accountInfoPath(0))).asString().getStatus());
+        assertEquals(HttpResponseStatus.NO_CONTENT.code(), Unirest.get(testAddress(accountInfoPath(0))).asString().getStatus());
 
         List<Long> accounts = new ArrayList<>();
         for (int i = 0; i < ACCOUNTS_NUMBER; i++) {
@@ -80,7 +80,7 @@ public class HttpBankServerTest {
                 })
                 .collect(Collectors.toList());
         for (Future<HttpResponse<String>> response : responses) {
-            assertEquals(StatusCodes.OK, response.get().getStatus());
+            assertEquals(HttpResponseStatus.OK.code(), response.get().getStatus());
         }
 
 
@@ -112,7 +112,7 @@ public class HttpBankServerTest {
         HttpResponse<String> responseCreate = Unirest.post(testAddress(ACCOUNT + CREATE))
                 .body(accountName)
                 .asString();
-        assertEquals(StatusCodes.CREATED, responseCreate.getStatus());
+        assertEquals(HttpResponseStatus.CREATED.code(), responseCreate.getStatus());
         Long id = Long.valueOf(responseCreate.getBody());
 
         JSONObject refill = new JSONObject();
@@ -121,13 +121,13 @@ public class HttpBankServerTest {
         HttpResponse<String> responseRefill = Unirest.post(testAddress(ACCOUNT + REFILL))
                 .body(refill)
                 .asString();
-        assertEquals(StatusCodes.OK, responseRefill.getStatus());
+        assertEquals(HttpResponseStatus.OK.code(), responseRefill.getStatus());
 
         return id;
     }
 
     private String accountInfoPath(long id) {
-        return ACCOUNT + INFO + "/" + id;
+        return ACCOUNT + "/" + id;
     }
 
     private String testAddress(String path) {

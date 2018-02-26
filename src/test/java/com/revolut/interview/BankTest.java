@@ -1,7 +1,5 @@
 package com.revolut.interview;
 
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.test.TestHazelcastInstanceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,8 +20,8 @@ public class BankTest {
     @Test
     public void testAccountCreateRefillAndTransfer() {
         Bank bank = new Bank();
-        long donorId = bank.createAccount("Donor");
-        long acceptorId = bank.createAccount("Acceptor");
+        long donorId = bank.createAccount("Donor").getId();
+        long acceptorId = bank.createAccount("Acceptor").getId();
 
         assertNotEquals(donorId, acceptorId);
         assertEquals(BigDecimal.ZERO, bank.findAccount(donorId).getMoney());
@@ -49,7 +47,7 @@ public class BankTest {
     public void refillOnNegativeAmountShouldNotChangeAccount() throws Exception {
 
         Bank bank = new Bank();
-        long id = bank.createAccount("Account");
+        long id = bank.createAccount("Account").getId();
 
         bank.refill(id, new BigDecimal(-10));
 
@@ -60,10 +58,10 @@ public class BankTest {
     public void transferOnNegativeAmountShouldFailAndDoNothing() throws Exception {
 
         Bank bank = new Bank();
-        long donorId = bank.createAccount("Donor");
-        long acceptorId = bank.createAccount("Acceptor");
+        long donorId = bank.createAccount("Donor").getId();
+        long acceptorId = bank.createAccount("Acceptor").getId();
 
-        BigDecimal donorAmount = bank.refill(donorId, BigDecimal.TEN);
+        BigDecimal donorAmount = bank.refill(donorId, BigDecimal.TEN).getMoney();
 
         assertFalse(bank.transfer(donorId, acceptorId, BigDecimal.valueOf(-10)));
 
@@ -75,9 +73,9 @@ public class BankTest {
     public void transferTheSameAccount() {
 
         Bank bank = new Bank();
-        long id = bank.createAccount("The same");
+        long id = bank.createAccount("The same").getId();
 
-        BigDecimal amount = bank.refill(id, BigDecimal.TEN);
+        BigDecimal amount = bank.refill(id, BigDecimal.TEN).getMoney();
 
         assertTrue(bank.transfer(id, id, amount));
 

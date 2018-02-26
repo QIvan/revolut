@@ -1,26 +1,36 @@
 package com.revolut.interview
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.revolut.interview.model.request.*
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.features.CallLogging
+import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
-import io.ktor.http.ContentType
+import io.ktor.html.respondHtml
 import io.ktor.http.HttpStatusCode
+import io.ktor.jackson.jackson
+import io.ktor.locations.*
+import io.ktor.request.receiveOrNull
 import io.ktor.response.respond
-import io.ktor.response.respondText
+import io.ktor.response.respondRedirect
+import io.ktor.routing.Routing
 import io.ktor.routing.get
-import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import org.slf4j.Logger
+import kotlinx.html.*
 import org.slf4j.LoggerFactory
 
 
-const val ACCOUNT = "/account";
-const val INFO = ACCOUNT + "/info";
-const val CREATE = ACCOUNT + "/create";
-const val REFILL = ACCOUNT + "/refill";
-const val TRANSFER = ACCOUNT + "/transfer";
-const val ID = "id"
+const val ACCOUNT = "/accounts";
+const val CREATE = "/create";
+const val REFILL = "/refill";
+const val TRANSFER = "/transfer";
+
+@Location(ACCOUNT + "/{id}") class Info(val id: Long)
+@Location(ACCOUNT + CREATE) class Create
+@Location(ACCOUNT + "/{id}" +  REFILL) class Refill(val id: Long)
+@Location(ACCOUNT + "/{id}" + TRANSFER) class Transfer(val id: Long)
 
 /**
  * @author Ivan Zemlyanskiy
@@ -34,19 +44,85 @@ class HttpBankServer(private val bank: Bank, val port: Int) {
     private val server =
             embeddedServer(Netty, port) {
                 install(DefaultHeaders)
-                routing {
-                    get("$INFO/{$ID}") {
-                        val id = call.parameters[ID]?.toLong()!!
-                        val account = bank.findAccount(id) ?: run {
+                install(CallLogging)
+                install(Locations)
+                install(ContentNegotiation) {
+                    jackson {
+                        configure(SerializationFeature.INDENT_OUTPUT, true)
+                    }
+                }
+                install(Routing) {
+
+
+                    get<Info> { info ->
+                        val account = bank.findAccount(info.id) ?: run {
                             call.respond(HttpStatusCode.NoContent, "{}")
                             return@get
                         }
 
-
+                        call.respond(account)
                     }
 
+
+                    post<Create>{
+                        val body = call.receiveOrNull(CreateRequest::class) ?: run {
+                            call.respond(HttpStatusCode.BadRequest)
+                            return@post
+                        }
+
+                        val account = bank.createAccount(body.name)
+                        call.respond(HttpStatusCode.Created, account)
+                    }
+
+
+                    post<Refill>{ query ->
+                        val body = call.receiveOrNull(RefillRequest::class) ?: run {
+                            call.respond(HttpStatusCode.BadRequest)
+                            return@post
+                        }
+
+                        val account = bank.refill(query.id, body.amount)
+                        if (account != null) {
+                            call.respond(HttpStatusCode.OK, account)
+                        } else {
+                            call.respond(HttpStatusCode.NotModified)
+                        }
+                    }
+
+
+                    post<Transfer>{ query ->
+                        val body = call.receiveOrNull(TransferRequest::class) ?: run {
+                            call.respond(HttpStatusCode.BadRequest)
+                            return@post
+                        }
+
+                        val transferSuccess = bank.transfer(query.id, body.acceptorId, body.amount)
+                        if (transferSuccess) {
+                            call.respond(HttpStatusCode.OK)
+                        } else {
+                            call.respond(HttpStatusCode.NotModified)
+                        }
+                    }
+
+
+                    get("/{...}") {
+                        call.respondRedirect("/")
+                    }
+                    get("/") {
+                        call.respondHtml {
+                            head {
+                                title { +"Revolut" }
+                            }
+                            body {
+                                h1 { +"Sample application as an interview task." }
+                                pre { +"A kotlin html builder rules!" }
+                            }
+                        }
+                    }
                 }
             }
+
+
 
     //
     //    public static final String ACCOUNT = "/account";
@@ -155,6 +231,6 @@ class HttpBankServer(private val bank: Bank, val port: Int) {
 
 
     fun start() {
-        server.start();
+        server.start(wait = true);
     }
 }

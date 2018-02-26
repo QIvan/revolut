@@ -19,11 +19,12 @@ class Bank {
     private val nextId: AtomicLong = AtomicLong()
     private val accounts: MutableMap<Long, Account> = ConcurrentHashMap()
 
-    fun createAccount(name: String): Long {
+    fun createAccount(name: String): Account {
         val id = nextId.getAndIncrement()
-        accounts[id] = Account(id, name)
+        val result = Account(id, name)
+        accounts[id] = result
 
-        return id
+        return result
     }
 
     fun transfer(donorId: Long, acceptorId: Long, amount: BigDecimal): Boolean {
@@ -58,14 +59,14 @@ class Bank {
     }
 
 
-    fun refill(id: Long, amount: BigDecimal): BigDecimal? {
+    fun refill(id: Long, amount: BigDecimal): Account? {
         if (amount <= BigDecimal.ZERO) {
             return null
         }
         accounts[id]?.let {
             synchronized(it) {
                 it.money = it.money + amount
-                return it.money
+                return it
             }
         }
         return null

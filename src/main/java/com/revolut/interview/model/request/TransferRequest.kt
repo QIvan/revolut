@@ -1,12 +1,11 @@
 package com.revolut.interview.model.request
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import java.math.BigDecimal
 
 /**
  * @author Ivan Zemlyanskiy
  */
-class TransferRequest(@JsonAlias("donor")
-                      val donorId: Long,
-                      @JsonAlias("acceptor")
+class TransferRequest(@JsonAlias("acceptor")
                       val acceptorId: Long,
-                      val amount: String)
+                      val amount: BigDecimal)
