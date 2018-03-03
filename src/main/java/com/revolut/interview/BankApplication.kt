@@ -12,6 +12,10 @@ import io.ktor.server.netty.*
  * @author Ivan Zemlyanskiy
  */
 fun main(args: Array<String>) {
-    val server = HttpBankServer(Bank(), 9000)
-    server.start()
+
+    val server = embeddedServer(Netty, 9000) {
+        bankApplication(Bank())
+    }
+
+    server.start(wait = true)
 }

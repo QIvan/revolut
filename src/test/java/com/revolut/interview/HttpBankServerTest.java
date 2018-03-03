@@ -45,8 +45,8 @@ public class HttpBankServerTest {
         ServerSocket serverSocket = new ServerSocket(0);
         port = serverSocket.getLocalPort();
         serverSocket.close();
-        HttpBankServer server = new HttpBankServer(bank, port);
-        server.start();
+//        HttpBankServer server = new HttpBankServer(bank, port);
+//        server.start();
     }
 
     @Test
